@@ -23,6 +23,16 @@ pushd /tmp
 curl -sSO "https://dl.google.com/cloudagents/install-logging-agent.sh"
 sudo bash install-logging-agent.sh
 popd
+echo "\
+<source>
+ type tail
+ format none
+ path /var/log/kern.log
+ pos_file /var/lib/google-fluentd/pos/kernlog.pos
+ read_from_head true
+ tag bitcoind
+</source>" > /etc/google-fluentd/config.d/kernlog.conf
+sudo systemctl restart google-fluentd
 
 
 # Enable ip forwarding and nat
