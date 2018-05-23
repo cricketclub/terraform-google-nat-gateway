@@ -18,6 +18,12 @@ data "template_file" "nat-startup-script" {
   template = <<EOF
 #!/bin/bash -xe
 
+# install stackdriver agent
+pushd /tmp
+curl -sSO "https://dl.google.com/cloudagents/install-logging-agent.sh"
+sudo bash install-logging-agent.sh
+popd
+
 # Enable ip forwarding and nat
 sysctl -w net.ipv4.ip_forward=1
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
@@ -81,7 +87,7 @@ module "nat-gateway" {
 resource "google_compute_route" "nat-gateway" {
   name                   = "${var.name}nat-${var.zone == "" ? lookup(var.region_params["${var.region}"], "zone") : var.zone}"
   project                = "${var.project}"
-  dest_range             = "0.0.0.0/0"
+  dest_range             = "${var.dest_ip_range}"
   network                = "${data.google_compute_network.network.self_link}"
   next_hop_instance      = "${element(split("/", element(module.nat-gateway.instances[0], 0)), 10)}"
   next_hop_instance_zone = "${var.zone == "" ? lookup(var.region_params["${var.region}"], "zone") : var.zone}"
