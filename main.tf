@@ -94,8 +94,9 @@ module "nat-gateway" {
 }
 
 resource "google_compute_route" "nat-gateway" {
-  name                   = "nat-${var.zone == "" ? lookup(var.region_params["${var.region}"], "zone") : var.zone}"
-  dest_range             = "${var.dest_ip_range}"
+  count                  = "${length(var.dest_ip_ranges)}"
+  name                   = "nat-${var.zone == "" ? lookup(var.region_params["${var.region}"], "zone") : var.zone}-${count.index}"
+  dest_range             = "${var.dest_ip_ranges[count.index]}"
   network                = "${data.google_compute_network.network.self_link}"
   next_hop_instance      = "${element(split("/", element(module.nat-gateway.instances[0], 0)), 10)}"
   next_hop_instance_zone = "${var.zone == "" ? lookup(var.region_params["${var.region}"], "zone") : var.zone}"

@@ -74,8 +74,8 @@ variable squid_config {
   default     = ""
 }
 
-variable dest_ip_range {
-  default = "0.0.0.0/0"
+variable dest_ip_ranges {
+  default = ["0.0.0.0/0"]
 }
 
 variable region_params {
